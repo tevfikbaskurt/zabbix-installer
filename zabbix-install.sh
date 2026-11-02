@@ -114,3 +114,10 @@ import_schema() {
   mysql -e "SET GLOBAL log_bin_trust_function_creators = 0;"
   ok "şema içe aktarıldı"
 }
+
+configure_server() {
+  info "Zabbix sunucu yapılandırması güncelleniyor..."
+  sed -i '/^DBPassword=/d' /etc/zabbix/zabbix_server.conf
+  printf 'DBPassword=%s\n' "$DB_PASSWORD" >> /etc/zabbix/zabbix_server.conf
+  ok "sunucu yapılandırması güncellendi"
+}
