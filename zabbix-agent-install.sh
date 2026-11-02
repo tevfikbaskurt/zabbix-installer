@@ -102,3 +102,25 @@ start_agent() {
   systemctl enable zabbix-agent2
   ok "zabbix-agent2 servisi başlatıldı ve kalıcı etkinleştirildi"
 }
+
+print_summary() {
+  echo
+  ok "agent kurulumu tamamlandı"
+  echo "  hostname : ${AGENT_HOSTNAME}"
+  echo "  sunucu   : ${ZABBIX_SERVER}"
+  echo "  port     : 10050/tcp"
+}
+
+main() {
+  check_root
+  check_os
+  prompt_server_ip
+  prompt_hostname
+  install_repo
+  install_agent
+  configure_agent
+  start_agent
+  print_summary
+}
+
+main "$@"
