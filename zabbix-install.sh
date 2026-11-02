@@ -106,3 +106,11 @@ SET GLOBAL log_bin_trust_function_creators = 1;
 SQL
   ok "Veritabanı ve kullanıcı hazırlandı."
 }
+
+import_schema() {
+  info "Zabbix veritabanı şeması içe aktarılıyor..."
+  zcat /usr/share/zabbix/sql-scripts/mysql/server.sql.gz \
+    | MYSQL_PWD="$DB_PASSWORD" mysql --default-character-set=utf8mb4 -u"$DB_USER" "$DB_NAME"
+  mysql -e "SET GLOBAL log_bin_trust_function_creators = 0;"
+  ok "şema içe aktarıldı"
+}
