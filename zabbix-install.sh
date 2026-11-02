@@ -71,3 +71,15 @@ prompt_timezone() {
   read -r -p "PHP saat dilimi [${PHP_TZ}]: " tz
   PHP_TZ="${tz:-$PHP_TZ}"
 }
+
+install_repo() {
+  info "Zabbix resmi deposu ekleniyor..."
+  local deb_file
+  deb_file=$(basename "$REPO_URL")
+
+  wget -q "$REPO_URL" -O "$deb_file"
+  dpkg -i "$deb_file"
+  rm -f "$deb_file"
+  apt-get update
+  ok "Zabbix deposu eklendi."
+}
