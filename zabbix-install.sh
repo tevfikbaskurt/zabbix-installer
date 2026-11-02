@@ -121,3 +121,13 @@ configure_server() {
   printf 'DBPassword=%s\n' "$DB_PASSWORD" >> /etc/zabbix/zabbix_server.conf
   ok "sunucu yapılandırması güncellendi"
 }
+
+configure_apache() {
+  info "Apache ve PHP saat dilimi yapılandırılıyor..."
+  if grep -q '^# php_value date.timezone' /etc/zabbix/apache.conf; then
+    sed -i "s|^# php_value date.timezone.*|php_value date.timezone ${PHP_TZ}|" /etc/zabbix/apache.conf
+  else
+    printf 'php_value date.timezone %s\n' "$PHP_TZ" >> /etc/zabbix/apache.conf
+  fi
+  ok "apache ve php yapılandırıldı"
+}
