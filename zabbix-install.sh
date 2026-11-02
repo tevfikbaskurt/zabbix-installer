@@ -66,6 +66,18 @@ prompt_db_password() {
   DB_PASSWORD="$pass"
 }
 
+prompt_db_name() {
+  local name
+  read -r -p "Zabbix veritabanı adı [${DB_NAME}]: " name
+  DB_NAME="${name:-$DB_NAME}"
+}
+
+prompt_db_user() {
+  local user
+  read -r -p "Zabbix veritabanı kullanıcısı [${DB_USER}]: " user
+  DB_USER="${user:-$DB_USER}"
+}
+
 prompt_timezone() {
   local tz
   read -r -p "PHP saat dilimi [${PHP_TZ}]: " tz
@@ -168,6 +180,8 @@ print_summary() {
 main() {
   check_root
   check_os
+  prompt_db_name
+  prompt_db_user
   prompt_db_password
   prompt_timezone
   install_repo
