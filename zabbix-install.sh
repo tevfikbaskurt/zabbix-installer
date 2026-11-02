@@ -152,3 +152,33 @@ start_services() {
   systemctl enable zabbix-server zabbix-agent apache2
   ok "servisler başlatıldı ve kalıcı olarak etkinleştirildi"
 }
+
+print_summary() {
+  local ip
+  ip=$(hostname -I | awk '{print $1}')
+
+  echo
+  ok "kurulum tamamlandı"
+  echo "  frontend  : http://${ip}/zabbix"
+  echo "  kullanıcı : Admin"
+  echo "  parola    : zabbix"
+  warn "ilk girişte Admin parolasını değiştirin"
+}
+
+main() {
+  check_root
+  check_os
+  prompt_db_password
+  prompt_timezone
+  install_repo
+  install_packages
+  setup_mysql
+  import_schema
+  configure_server
+  configure_apache
+  configure_frontend
+  start_services
+  print_summary
+}
+
+main "$@"
