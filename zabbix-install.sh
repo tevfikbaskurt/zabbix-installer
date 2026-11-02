@@ -145,3 +145,10 @@ configure_frontend() {
 PHP
   ok "frontend yapılandırıldı"
 }
+
+start_services() {
+  info "Zabbix servisleri başlatılıyor..."
+  systemctl restart zabbix-server zabbix-agent apache2
+  systemctl enable zabbix-server zabbix-agent apache2
+  ok "servisler başlatıldı ve kalıcı olarak etkinleştirildi"
+}
