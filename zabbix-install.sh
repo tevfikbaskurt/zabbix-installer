@@ -131,3 +131,17 @@ configure_apache() {
   fi
   ok "apache ve php yapılandırıldı"
 }
+
+configure_frontend() {
+  info "Zabbix frontend yapılandırması yazılıyor..."
+  cat > /etc/zabbix/web/zabbix.conf.php <<PHP
+<?php
+\$DB['TYPE']     = 'MYSQL';
+\$DB['SERVER']   = 'localhost';
+\$DB['PORT']     = '0';
+\$DB['DATABASE'] = '${DB_NAME}';
+\$DB['USER']     = '${DB_USER}';
+\$DB['PASSWORD'] = '${DB_PASSWORD}';
+PHP
+  ok "frontend yapılandırıldı"
+}
