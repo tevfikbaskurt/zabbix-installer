@@ -26,7 +26,7 @@ error() { printf '%s[HATA]%s %s\n'  "$C_RED"    "$C_RESET" "$*" >&2; exit 1; }
 
 check_root() {
   if [[ $EUID -ne 0 ]]; then
-    error "Bu script root olarak çalıştırılmalıdır (sudo ile çalıştırın)."
+    error "bu scriptin çalıştırılması için root yetkisi gereklidir sudo ile çalıştırın."
   fi
 }
 
@@ -40,7 +40,34 @@ check_os() {
   version=$(lsb_release -rs)
 
   if [[ "$distro" != "Ubuntu" || "$version" != "24.04" ]]; then
-    error "Bu script yalnızca Ubuntu 24.04 destekler (bulunan: $distro $version)."
+    error "bu script yalnızca Ubuntu 24.04 destekler (bulunan: $distro $version)."
   fi
   ok "İşletim sistemi doğrulandı: $distro $version"
+}
+
+prompt_db_password() {
+  local pass confirm
+  while true; do
+    read -r -s -p "Zabbix veritabanı parolası: " pass
+    echo
+    read -r -s -p "Parolayı doğrulayın: " confirm
+    echo
+
+    if [[ -z "$pass" ]]; then
+      warn "Parola boş olamaz."
+      continue
+    fi
+    if [[ "$pass" != "$confirm" ]]; then
+      warn "Parolalar eşleşmedi, tekrar deneyin."
+      continue
+    fi
+    break
+  done
+  DB_PASSWORD="$pass"
+}
+
+prompt_timezone() {
+  local tz
+  read -r -p "PHP saat dilimi [${PHP_TZ}]: " tz
+  PHP_TZ="${tz:-$PHP_TZ}"
 }
