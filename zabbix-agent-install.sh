@@ -42,3 +42,23 @@ check_os() {
   fi
   ok "İşletim sistemi doğrulandı: $distro $version"
 }
+
+prompt_server_ip() {
+  local ip
+  while true; do
+    read -r -p "Zabbix sunucu IP adresi: " ip
+    if [[ -z "$ip" ]]; then
+      warn "Sunucu IP adresi boş olamaz."
+      continue
+    fi
+    break
+  done
+  ZABBIX_SERVER="$ip"
+}
+
+prompt_hostname() {
+  local host default_host
+  default_host=$(hostname)
+  read -r -p "Agent hostname [${default_host}]: " host
+  AGENT_HOSTNAME="${host:-$default_host}"
+}
