@@ -74,3 +74,9 @@ install_repo() {
   apt-get update
   ok "Zabbix deposu eklendi."
 }
+
+install_agent() {
+  info "Zabbix Agent 2 paketi kuruluyor..."
+  DEBIAN_FRONTEND=noninteractive apt-get install -y zabbix-agent2
+  ok "zabbix-agent2 kuruldu."
+}
