@@ -83,3 +83,15 @@ install_repo() {
   apt-get update
   ok "Zabbix deposu eklendi."
 }
+
+install_packages() {
+  info "MySQL ve Zabbix paketleri kuruluyor..."
+  DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    mysql-server \
+    zabbix-server-mysql \
+    zabbix-frontend-php \
+    zabbix-apache-conf \
+    zabbix-sql-scripts \
+    zabbix-agent
+  ok "Paketler kuruldu."
+}
