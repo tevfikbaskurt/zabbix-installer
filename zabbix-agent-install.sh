@@ -21,3 +21,24 @@ info()  { printf '%s[INFO]%s %s\n'  "$C_BLUE"   "$C_RESET" "$*"; }
 ok()    { printf '%s[OK]%s %s\n'    "$C_GREEN"  "$C_RESET" "$*"; }
 warn()  { printf '%s[UYARI]%s %s\n' "$C_YELLOW" "$C_RESET" "$*"; }
 error() { printf '%s[HATA]%s %s\n'  "$C_RED"    "$C_RESET" "$*" >&2; exit 1; }
+
+check_root() {
+  if [[ $EUID -ne 0 ]]; then
+    error "bu scriptin çalıştırılması için root yetkisi gereklidir sudo ile çalıştırın."
+  fi
+}
+
+check_os() {
+  if ! command -v lsb_release >/dev/null 2>&1; then
+    error "lsb_release bulunamadı; Ubuntu 24.04 gereklidir."
+  fi
+
+  local distro version
+  distro=$(lsb_release -is)
+  version=$(lsb_release -rs)
+
+  if [[ "$distro" != "Ubuntu" || "$version" != "24.04" ]]; then
+    error "bu script yalnızca Ubuntu 24.04 destekler (bulunan: $distro $version)."
+  fi
+  ok "İşletim sistemi doğrulandı: $distro $version"
+}
