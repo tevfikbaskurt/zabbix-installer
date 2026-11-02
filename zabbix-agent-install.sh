@@ -80,3 +80,18 @@ install_agent() {
   DEBIAN_FRONTEND=noninteractive apt-get install -y zabbix-agent2
   ok "zabbix-agent2 kuruldu."
 }
+
+configure_agent() {
+  info "Zabbix Agent 2 yapılandırması yazılıyor..."
+  local conf
+  conf="/etc/zabbix/zabbix_agent2.conf"
+
+  sed -i '/^Server=/d' "$conf"
+  sed -i '/^ServerActive=/d' "$conf"
+  sed -i '/^Hostname=/d' "$conf"
+
+  printf 'Server=%s\n' "$ZABBIX_SERVER" >> "$conf"
+  printf 'ServerActive=%s\n' "$ZABBIX_SERVER" >> "$conf"
+  printf 'Hostname=%s\n' "$AGENT_HOSTNAME" >> "$conf"
+  ok "agent yapılandırıldı"
+}
