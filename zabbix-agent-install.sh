@@ -62,3 +62,15 @@ prompt_hostname() {
   read -r -p "Agent hostname [${default_host}]: " host
   AGENT_HOSTNAME="${host:-$default_host}"
 }
+
+install_repo() {
+  info "Zabbix resmi deposu ekleniyor..."
+  local deb_file
+  deb_file=$(basename "$REPO_URL")
+
+  wget -q "$REPO_URL" -O "$deb_file"
+  dpkg -i "$deb_file"
+  rm -f "$deb_file"
+  apt-get update
+  ok "Zabbix deposu eklendi."
+}
