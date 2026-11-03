@@ -13,6 +13,15 @@ PHP_TZ="Europe/Istanbul"
 REPO_PKG="zabbix-release_latest_${ZABBIX_VERSION}+ubuntu${UBUNTU_VERSION}_all.deb"
 REPO_URL="https://repo.zabbix.com/zabbix/${ZABBIX_VERSION}/release/ubuntu/pool/main/z/zabbix-release/${REPO_PKG}"
 
+DEB_FILE=""
+
+cleanup() {
+  if [[ -n "$DEB_FILE" && -f "$DEB_FILE" ]]; then
+    rm -f "$DEB_FILE"
+  fi
+}
+trap cleanup EXIT
+
 C_RESET=$'\033[0m'
 C_RED=$'\033[0;31m'
 C_GREEN=$'\033[0;32m'
@@ -120,12 +129,12 @@ prompt_timezone() {
 
 install_repo() {
   info "Zabbix resmi deposu ekleniyor..."
-  local deb_file
-  deb_file=$(basename "$REPO_URL")
+  DEB_FILE=$(basename "$REPO_URL")
 
-  wget -q "$REPO_URL" -O "$deb_file"
-  dpkg -i "$deb_file"
-  rm -f "$deb_file"
+  wget -q "$REPO_URL" -O "$DEB_FILE"
+  dpkg -i "$DEB_FILE"
+  rm -f "$DEB_FILE"
+  DEB_FILE=""
   apt-get update
   ok "Zabbix deposu eklendi."
 }
