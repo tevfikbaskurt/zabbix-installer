@@ -71,6 +71,14 @@ prompt_db_password() {
       warn "Parolalar eşleşmedi, tekrar deneyin."
       continue
     fi
+    if [[ "$pass" == *"'"* ]]; then
+      warn "Parola tek tırnak (') içeremez."
+      continue
+    fi
+    if [[ "$pass" == *"\\"* ]]; then
+      warn "Parola ters slash (\\) içeremez."
+      continue
+    fi
     break
   done
   DB_PASSWORD="$pass"
@@ -78,14 +86,30 @@ prompt_db_password() {
 
 prompt_db_name() {
   local name
-  read -r -p "Zabbix veritabanı adı [${DB_NAME}]: " name
-  DB_NAME="${name:-$DB_NAME}"
+  while true; do
+    read -r -p "Zabbix veritabanı adı [${DB_NAME}]: " name
+    name="${name:-$DB_NAME}"
+    if [[ ! "$name" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+      warn "Veritabanı adı yalnızca harf, rakam, alt çizgi ve tire içerebilir."
+      continue
+    fi
+    break
+  done
+  DB_NAME="$name"
 }
 
 prompt_db_user() {
   local user
-  read -r -p "Zabbix veritabanı kullanıcısı [${DB_USER}]: " user
-  DB_USER="${user:-$DB_USER}"
+  while true; do
+    read -r -p "Zabbix veritabanı kullanıcısı [${DB_USER}]: " user
+    user="${user:-$DB_USER}"
+    if [[ ! "$user" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+      warn "Kullanıcı adı yalnızca harf, rakam, alt çizgi ve tire içerebilir."
+      continue
+    fi
+    break
+  done
+  DB_USER="$user"
 }
 
 prompt_timezone() {
