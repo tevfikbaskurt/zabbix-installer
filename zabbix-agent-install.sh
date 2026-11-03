@@ -11,6 +11,15 @@ AGENT_HOSTNAME=""
 REPO_PKG="zabbix-release_latest_${ZABBIX_VERSION}+ubuntu${UBUNTU_VERSION}_all.deb"
 REPO_URL="https://repo.zabbix.com/zabbix/${ZABBIX_VERSION}/release/ubuntu/pool/main/z/zabbix-release/${REPO_PKG}"
 
+DEB_FILE=""
+
+cleanup() {
+  if [[ -n "$DEB_FILE" && -f "$DEB_FILE" ]]; then
+    rm -f "$DEB_FILE"
+  fi
+}
+trap cleanup EXIT
+
 C_RESET=$'\033[0m'
 C_RED=$'\033[0;31m'
 C_GREEN=$'\033[0;32m'
@@ -43,12 +52,32 @@ check_os() {
   ok "İşletim sistemi doğrulandı: $distro $version"
 }
 
+check_dependencies() {
+  local cmd
+  for cmd in wget dpkg apt-get lsb_release systemctl; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+      error "Gerekli komut bulunamadı: $cmd"
+    fi
+  done
+  ok "Gerekli komutlar mevcut"
+}
+
+check_existing_install() {
+  if dpkg -s zabbix-agent2 >/dev/null 2>&1; then
+    warn "zabbix-agent2 zaten kurulu; yeniden çalıştırma yapılandırmayı üzerine yazabilir."
+  fi
+}
+
 prompt_server_ip() {
   local ip
   while true; do
-    read -r -p "Zabbix sunucu IP adresi: " ip
+    read -r -p "Zabbix sunucu IP adresi veya hostname: " ip
     if [[ -z "$ip" ]]; then
-      warn "Sunucu IP adresi boş olamaz."
+      warn "Sunucu adresi boş olamaz."
+      continue
+    fi
+    if [[ ! "$ip" =~ ^[a-zA-Z0-9.-]+$ ]]; then
+      warn "Geçersiz adres; yalnızca harf, rakam, nokta ve tire kullanın."
       continue
     fi
     break
@@ -59,18 +88,26 @@ prompt_server_ip() {
 prompt_hostname() {
   local host default_host
   default_host=$(hostname)
-  read -r -p "Agent hostname [${default_host}]: " host
-  AGENT_HOSTNAME="${host:-$default_host}"
+  while true; do
+    read -r -p "Agent hostname [${default_host}]: " host
+    host="${host:-$default_host}"
+    if [[ ! "$host" =~ ^[a-zA-Z0-9.-]+$ ]]; then
+      warn "Geçersiz hostname; yalnızca harf, rakam, nokta ve tire kullanın."
+      continue
+    fi
+    break
+  done
+  AGENT_HOSTNAME="$host"
 }
 
 install_repo() {
   info "Zabbix resmi deposu ekleniyor..."
-  local deb_file
-  deb_file=$(basename "$REPO_URL")
+  DEB_FILE=$(basename "$REPO_URL")
 
-  wget -q "$REPO_URL" -O "$deb_file"
-  dpkg -i "$deb_file"
-  rm -f "$deb_file"
+  wget -q "$REPO_URL" -O "$DEB_FILE"
+  dpkg -i "$DEB_FILE"
+  rm -f "$DEB_FILE"
+  DEB_FILE=""
   apt-get update
   ok "Zabbix deposu eklendi."
 }
@@ -86,6 +123,10 @@ configure_agent() {
   local conf
   conf="/etc/zabbix/zabbix_agent2.conf"
 
+  if [[ ! -f "${conf}.bak" ]]; then
+    cp "$conf" "${conf}.bak"
+  fi
+
   sed -i '/^Server=/d' "$conf"
   sed -i '/^ServerActive=/d' "$conf"
   sed -i '/^Hostname=/d' "$conf"
@@ -100,7 +141,12 @@ start_agent() {
   info "Zabbix Agent 2 servisi başlatılıyor..."
   systemctl restart zabbix-agent2
   systemctl enable zabbix-agent2
-  ok "zabbix-agent2 servisi başlatıldı ve kalıcı etkinleştirildi"
+
+  if systemctl is-active --quiet zabbix-agent2; then
+    ok "zabbix-agent2 servisi aktif"
+  else
+    warn "zabbix-agent2 başlatıldı ama aktif değil; journalctl -u zabbix-agent2 ile kontrol edin."
+  fi
 }
 
 print_summary() {
@@ -109,11 +155,14 @@ print_summary() {
   echo "  hostname : ${AGENT_HOSTNAME}"
   echo "  sunucu   : ${ZABBIX_SERVER}"
   echo "  port     : 10050/tcp"
+  warn "pasif izleme için 10050/tcp portunun sunucudan bu makineye açık olduğundan emin olun"
 }
 
 main() {
   check_root
   check_os
+  check_dependencies
+  check_existing_install
   prompt_server_ip
   prompt_hostname
   install_repo
