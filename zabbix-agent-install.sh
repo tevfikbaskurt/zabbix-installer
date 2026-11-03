@@ -141,7 +141,12 @@ start_agent() {
   info "Zabbix Agent 2 servisi başlatılıyor..."
   systemctl restart zabbix-agent2
   systemctl enable zabbix-agent2
-  ok "zabbix-agent2 servisi başlatıldı ve kalıcı etkinleştirildi"
+
+  if systemctl is-active --quiet zabbix-agent2; then
+    ok "zabbix-agent2 servisi aktif"
+  else
+    warn "zabbix-agent2 başlatıldı ama aktif değil; journalctl -u zabbix-agent2 ile kontrol edin."
+  fi
 }
 
 print_summary() {
