@@ -43,6 +43,16 @@ check_os() {
   ok "İşletim sistemi doğrulandı: $distro $version"
 }
 
+check_dependencies() {
+  local cmd
+  for cmd in wget dpkg apt-get lsb_release systemctl; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+      error "Gerekli komut bulunamadı: $cmd"
+    fi
+  done
+  ok "Gerekli komutlar mevcut"
+}
+
 prompt_server_ip() {
   local ip
   while true; do
@@ -114,6 +124,7 @@ print_summary() {
 main() {
   check_root
   check_os
+  check_dependencies
   prompt_server_ip
   prompt_hostname
   install_repo
