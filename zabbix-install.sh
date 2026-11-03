@@ -162,6 +162,15 @@ SQL
 }
 
 import_schema() {
+  info "Zabbix veritabanı şeması kontrol ediliyor..."
+  local table_count
+  table_count=$(mysql -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '${DB_NAME}';" 2>/dev/null || echo 0)
+
+  if [[ "$table_count" -gt 0 ]]; then
+    warn "Veritabanında zaten tablolar var; şema importu atlanıyor."
+    return 0
+  fi
+
   info "Zabbix veritabanı şeması içe aktarılıyor..."
   zcat /usr/share/zabbix/sql-scripts/mysql/server.sql.gz \
     | MYSQL_PWD="$DB_PASSWORD" mysql --default-character-set=utf8mb4 -u"$DB_USER" "$DB_NAME"
