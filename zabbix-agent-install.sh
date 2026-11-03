@@ -73,8 +73,16 @@ prompt_server_ip() {
 prompt_hostname() {
   local host default_host
   default_host=$(hostname)
-  read -r -p "Agent hostname [${default_host}]: " host
-  AGENT_HOSTNAME="${host:-$default_host}"
+  while true; do
+    read -r -p "Agent hostname [${default_host}]: " host
+    host="${host:-$default_host}"
+    if [[ ! "$host" =~ ^[a-zA-Z0-9.-]+$ ]]; then
+      warn "Geçersiz hostname; yalnızca harf, rakam, nokta ve tire kullanın."
+      continue
+    fi
+    break
+  done
+  AGENT_HOSTNAME="$host"
 }
 
 install_repo() {
