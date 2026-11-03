@@ -155,6 +155,7 @@ print_summary() {
   echo "  hostname : ${AGENT_HOSTNAME}"
   echo "  sunucu   : ${ZABBIX_SERVER}"
   echo "  port     : 10050/tcp"
+  warn "pasif izleme için 10050/tcp portunun sunucudan bu makineye açık olduğundan emin olun"
 }
 
 main() {
