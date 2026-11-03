@@ -114,6 +114,10 @@ configure_agent() {
   local conf
   conf="/etc/zabbix/zabbix_agent2.conf"
 
+  if [[ ! -f "${conf}.bak" ]]; then
+    cp "$conf" "${conf}.bak"
+  fi
+
   sed -i '/^Server=/d' "$conf"
   sed -i '/^ServerActive=/d' "$conf"
   sed -i '/^Hostname=/d' "$conf"
