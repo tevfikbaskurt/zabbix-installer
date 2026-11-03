@@ -56,9 +56,13 @@ check_dependencies() {
 prompt_server_ip() {
   local ip
   while true; do
-    read -r -p "Zabbix sunucu IP adresi: " ip
+    read -r -p "Zabbix sunucu IP adresi veya hostname: " ip
     if [[ -z "$ip" ]]; then
-      warn "Sunucu IP adresi boş olamaz."
+      warn "Sunucu adresi boş olamaz."
+      continue
+    fi
+    if [[ ! "$ip" =~ ^[a-zA-Z0-9.-]+$ ]]; then
+      warn "Geçersiz adres; yalnızca harf, rakam, nokta ve tire kullanın."
       continue
     fi
     break
