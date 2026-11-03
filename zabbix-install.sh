@@ -118,6 +118,14 @@ install_packages() {
   ok "Paketler kuruldu."
 }
 
+check_mysql_root() {
+  info "MySQL root erişimi kontrol ediliyor..."
+  if ! mysql -e "SELECT 1" >/dev/null 2>&1; then
+    error "MySQL root erişimi başarısız; mysql-server çalışıyor mu kontrol edin."
+  fi
+  ok "MySQL root erişimi sağlandı"
+}
+
 setup_mysql() {
   info "MySQL veritabanı ve kullanıcısı hazırlanıyor..."
   mysql <<SQL
@@ -197,6 +205,7 @@ main() {
   prompt_timezone
   install_repo
   install_packages
+  check_mysql_root
   setup_mysql
   import_schema
   configure_server
