@@ -171,8 +171,8 @@ import_schema() {
 
 configure_server() {
   info "Zabbix sunucu yapılandırması güncelleniyor..."
-  sed -i '/^DBPassword=/d' /etc/zabbix/zabbix_server.conf
-  printf 'DBPassword=%s\n' "$DB_PASSWORD" >> /etc/zabbix/zabbix_server.conf
+  sed -i '/^DBName=/d;/^DBUser=/d;/^DBPassword=/d' /etc/zabbix/zabbix_server.conf
+  printf 'DBName=%s\nDBUser=%s\nDBPassword=%s\n' "$DB_NAME" "$DB_USER" "$DB_PASSWORD" >> /etc/zabbix/zabbix_server.conf
   ok "sunucu yapılandırması güncellendi"
 }
 
