@@ -64,6 +64,12 @@ check_dependencies() {
   ok "Gerekli komutlar mevcut"
 }
 
+check_existing_install() {
+  if dpkg -s zabbix-server-mysql >/dev/null 2>&1; then
+    warn "zabbix-server zaten kurulu; yeniden çalıştırma yapılandırmaları üzerine yazabilir."
+  fi
+}
+
 prompt_db_password() {
   local pass confirm
   while true; do
@@ -241,6 +247,7 @@ main() {
   check_root
   check_os
   check_dependencies
+  check_existing_install
   prompt_db_name
   prompt_db_user
   prompt_db_password
